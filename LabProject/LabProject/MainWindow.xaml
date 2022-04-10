@@ -1,0 +1,84 @@
+﻿<Window x:Class="LabProject.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LabProject"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="650" Width="1000">
+    <Window.Resources>
+        <local:ByteToStringConverter x:Key="ColorConverter" />
+    </Window.Resources>
+    <Grid ShowGridLines="False">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="320" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Image
+            Grid.Column="0" Grid.Row="1"
+            Width="{Binding BitmapHandler.BitmapWidth}" Height="{Binding BitmapHandler.BitmapHeight}"
+            Source="{Binding BitmapHandler.Bitmap}"
+            MouseLeftButtonDown="MouseLeftClick">
+            <!-- Not MVVM -->
+        </Image>
+
+        <Border Grid.Column="1" Grid.Row="0" Background="LightSlateGray">
+            <ScrollViewer>
+                <StackPanel VerticalAlignment="Top">
+                    <TextBlock Text="Контур" Margin="5" Height="30" TextAlignment="Center" FontSize="20" FontWeight="Bold"/>
+                    <Grid ShowGridLines="False" Height="30">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBox Grid.Column="0" Text="{Binding OutlineColor.A, Mode=TwoWay, Converter={StaticResource ColorConverter}}" TextAlignment="Center" FontSize="16" Background="AntiqueWhite" BorderBrush="Black" Margin="3"/>
+                        <TextBox Grid.Column="1" Text="{Binding OutlineColor.R, Mode=TwoWay, Converter={StaticResource ColorConverter}}" TextAlignment="Center" FontSize="16" Background="LightCoral" BorderBrush="Black" Margin="3"/>
+                        <TextBox Grid.Column="2" Text="{Binding OutlineColor.G, Mode=TwoWay, Converter={StaticResource ColorConverter}}" TextAlignment="Center" FontSize="16" Background="LightGreen" BorderBrush="Black" Margin="3"/>
+                        <TextBox Grid.Column="3" Text="{Binding OutlineColor.B, Mode=TwoWay, Converter={StaticResource ColorConverter}}" TextAlignment="Center" FontSize="16" Background="LightBlue" BorderBrush="Black" Margin="3"/>
+                        <TextBox Grid.Column="4" Text="{Binding OutlineThickness, Mode=TwoWay, Converter={StaticResource ColorConverter}}" TextAlignment="Center" FontSize="16" Background="Silver" BorderBrush="Black" Margin="3"/>
+                    </Grid>
+
+                    <TextBlock Text="Заливка" Margin="5" Height="30" TextAlignment="Center" FontSize="20" FontWeight="Bold"/>
+                    <Grid ShowGridLines="False" Height="30">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBox Grid.Column="0" Text="{Binding FillingColor.A, Mode=TwoWay, Converter={StaticResource ColorConverter}}" TextAlignment="Center" FontSize="16" Background="AntiqueWhite" BorderBrush="Black" Margin="3"/>
+                        <TextBox Grid.Column="1" Text="{Binding FillingColor.R, Mode=TwoWay, Converter={StaticResource ColorConverter}}" TextAlignment="Center" FontSize="16" Background="LightCoral" BorderBrush="Black" Margin="3"/>
+                        <TextBox Grid.Column="2" Text="{Binding FillingColor.G, Mode=TwoWay, Converter={StaticResource ColorConverter}}" TextAlignment="Center" FontSize="16" Background="LightGreen" BorderBrush="Black" Margin="3"/>
+                        <TextBox Grid.Column="3" Text="{Binding FillingColor.B, Mode=TwoWay, Converter={StaticResource ColorConverter}}" TextAlignment="Center" FontSize="16" Background="LightBlue" BorderBrush="Black" Margin="3"/>
+                    </Grid>
+
+                    <Button Content="Удалить маркеры разметки" Height="50" Margin="5" FontSize="16" FontWeight="Bold" Foreground="Red" Command="{Binding ClearMarkupPointsCommand}" />
+                    <TextBlock Text="Фигуры" Margin="5" Height="30" TextAlignment="Center" FontSize="20" FontWeight="Bold"/>
+
+                    <ItemsControl ItemsSource="{Binding ButtonWrappers}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding Content}" Command="{Binding Command}" Height="50" Margin="5" FontSize="16"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Window>
