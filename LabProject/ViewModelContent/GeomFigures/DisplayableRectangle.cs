@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Shapes;
 using System.Windows.Media;
 
 namespace LabProject
@@ -19,7 +18,7 @@ namespace LabProject
         }
 
 
-        Shape IDisplayable.CreateShape()
+        ShapeInfo IDisplayable.GetShapeInfo()
         {
             System.Windows.Shapes.Rectangle shape = new System.Windows.Shapes.Rectangle
             {
@@ -31,7 +30,9 @@ namespace LabProject
                 Fill = new SolidColorBrush(FillingColor)
             };
 
-            return shape;
+            Rect bb = new Rect(shape.Margin.Left, shape.Margin.Top, shape.Width, shape.Height);
+
+            return new ShapeInfo(shape, bb);
         }
     }
 }

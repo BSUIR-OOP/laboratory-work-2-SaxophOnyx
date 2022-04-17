@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Shapes;
 using System.Windows.Media;
+using System;
 
 namespace LabProject
 {
@@ -13,9 +14,9 @@ namespace LabProject
         }
 
 
-        Shape IDisplayable.CreateShape()
+        ShapeInfo IDisplayable.GetShapeInfo()
         {
-            Line shape = new Line
+            Line line = new Line
             {
                 X1 = A.X,
                 Y1 = A.Y,
@@ -27,7 +28,14 @@ namespace LabProject
                 Fill = new SolidColorBrush(OutlineColor)
             };
 
-            return shape;
+            double left = Math.Min(line.X1, line.X2);
+            double top = Math.Min(line.Y1, line.Y2);
+            double right = Math.Max(line.X1, line.X2);
+            double bottom = Math.Max(line.Y1, line.Y2);
+
+            Rect bb = new Rect(left, top, (right - left) + line.StrokeThickness * 2, (bottom - top) + line.StrokeThickness * 2);
+
+            return new ShapeInfo(line, bb);
         }
     }
 }

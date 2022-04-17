@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace LabProject
 {
@@ -55,28 +54,16 @@ namespace LabProject
 
         public void Display(IDisplayable figure)
         {
-            Shape shape = figure.CreateShape();
-            shape.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            shape.Arrange(new Rect(0, 0, Bitmap.Width, Bitmap.Height));
+            ShapeInfo info = figure.GetShapeInfo();
+            info.Shape.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            info.Shape.Arrange(new Rect(0, 0, Bitmap.Width, Bitmap.Height));
 
             DrawingVisual visual = new DrawingVisual();
-
+            
             using (DrawingContext dc = visual.RenderOpen())
             {
-                VisualBrush vb = new VisualBrush(shape);
-
-                if (shape is System.Windows.Shapes.Polygon)
-                {
-                    Rect bb = (shape as System.Windows.Shapes.Polygon).GetBoundingBox();
-                    dc.DrawRectangle(vb, null, new Rect(bb.Left, bb.Top, bb.Width, bb.Height));
-                }
-                else if (shape is System.Windows.Shapes.Line)
-                {
-                    Rect bb = (shape as System.Windows.Shapes.Line).GetBoundingBox();
-                    dc.DrawRectangle(vb, null, new Rect(bb.Left, bb.Top, bb.Width, bb.Height));
-                }
-                else
-                    dc.DrawRectangle(vb, null, new Rect(new Point(shape.Margin.Left, shape.Margin.Top), new Size(shape.ActualWidth, shape.ActualHeight)));
+                VisualBrush vb = new VisualBrush(info.Shape);
+                dc.DrawRectangle(vb, null, info.BoundingBox);
             } 
 
             Bitmap.Render(visual);

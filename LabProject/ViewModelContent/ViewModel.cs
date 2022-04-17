@@ -4,10 +4,14 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace LabProject
 {
-    public class ViewModel: INotifyPropertyChanged
+    public delegate IDisplayable CreateDisplayableFigure(Queue<Point> points, Color fillingColor, Color outlineColor, byte outlineThickness);
+
+
+    public partial class ViewModel: INotifyPropertyChanged
     {
         private List<IDisplayable> _figures;
 
@@ -15,15 +19,7 @@ namespace LabProject
 
         private ObservableCollection<ButtonWrapper> _buttonWrappers;
 
-        public ObservableCollection<ButtonWrapper> ButtonWrappers
-        {
-            get { return _buttonWrappers; }
-            set
-            {
-                _buttonWrappers = value;
-                NotifyPropertyChanged(nameof(ButtonWrappers));
-            }
-        }
+        public ReadOnlyObservableCollection<ButtonWrapper> ButtonWrappers { get; }
 
         public BitmapHandler BitmapHandler { get; set; }
 
@@ -78,16 +74,16 @@ namespace LabProject
 
             ClearMarkupPointsCommand = new DelegateCommand(ClearMarkupPoints);
 
-            ButtonWrappers = new ObservableCollection<ButtonWrapper>
-            {
-                new ButtonWrapper(new DelegateCommand(CreateCircle), "Добавить круг"),
-                new ButtonWrapper(new DelegateCommand(CreateRectangle), "Добавить прямоугольник"),
-                new ButtonWrapper(new DelegateCommand(CreateDot), "Добавить точку"),
-                new ButtonWrapper(new DelegateCommand(CreateLineSegment), "Добавить отрезок"),
-                new ButtonWrapper(new DelegateCommand(CreateEllipse), "Добавить эллипс"),
-                new ButtonWrapper(new DelegateCommand(CreatePolygon), "Добавить многоугольник"),
-                new ButtonWrapper(new DelegateCommand(CreateRegularPolygon), "Добавить правильный многоугольник")
-            };
+            _buttonWrappers = new ObservableCollection<ButtonWrapper>();
+            ButtonWrappers = new ReadOnlyObservableCollection<ButtonWrapper>(_buttonWrappers);
+
+            AddButtonWrapper(FiguresFactory.CreateDisplayableDot, "Добавить точку");
+            AddButtonWrapper(FiguresFactory.CreateDisplayableLineSegment, "Добавить отрезок");
+            AddButtonWrapper(FiguresFactory.CreateDisplayableCircle, "Добавить круг");
+            AddButtonWrapper(FiguresFactory.CreateDisplayableRectangle, "Добавить прямоугольник");
+            AddButtonWrapper(FiguresFactory.CreateDisplayableEllipse, "Добавить эллипс");
+            AddButtonWrapper(FiguresFactory.CreateDisplayablePolygon, "Добавить многоугольник");
+            AddButtonWrapper(FiguresFactory.CreateDisplayableRegularPolygon, "Добавить правильный многоугольник");
         }
 
 
@@ -96,6 +92,11 @@ namespace LabProject
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void AddButtonWrapper(CreateDisplayableFigure method, string content)
+        {
+            _buttonWrappers.Add(new ButtonWrapper(new AddFigureCommand(AddFigure, method), content));
         }
 
         public void AddMarkupPoint(double x, double y)
@@ -122,145 +123,13 @@ namespace LabProject
             }
         }
 
-        private void CreateCircle()
+        private void AddFigure(CreateDisplayableFigure method)
         {
-            int minPointsNumber = 2;
+            IDisplayable figure = method(_markupPoints, FillingColor.GetColor(), OutlineColor.GetColor(), OutlineThickness);
 
-            if (_markupPoints.Count >= minPointsNumber)
+            if (figure != null)
             {
-                Point center = _markupPoints.Dequeue();
-                Point point = _markupPoints.Dequeue();
-
-                DisplayableCircle circle = new DisplayableCircle(center, point)
-                {
-                    OutlineColor = OutlineColor.GetColor(),
-                    OutlineThickness = OutlineThickness,
-                    FillingColor = FillingColor.GetColor()
-                };
-
-                _figures.Add(circle);
-                RedrawBitmap();
-            }
-        }
-
-        private void CreateRectangle()
-        {
-            int minPointsNumber = 2;
-
-            if (_markupPoints.Count >= minPointsNumber)
-            {
-                Point point1 = _markupPoints.Dequeue();
-                Point point2 = _markupPoints.Dequeue();
-
-                DisplayableRectangle rectangle = new DisplayableRectangle(point1, point2)
-                {
-                    OutlineColor = OutlineColor.GetColor(),
-                    OutlineThickness = OutlineThickness,
-                    FillingColor = FillingColor.GetColor()
-                };
-
-                _figures.Add(rectangle);
-                RedrawBitmap();
-            }
-        }
-
-        private void CreateDot()
-        {
-            int minPointsNumber = 1;
-
-            if (_markupPoints.Count >= minPointsNumber)
-            {
-                Point point = _markupPoints.Dequeue();
-
-                DisplayableDot dot = new DisplayableDot(point.X, point.Y)
-                {
-                    OutlineColor = OutlineColor.GetColor(),
-                    OutlineThickness = OutlineThickness
-                };
-
-                _figures.Add(dot);
-                RedrawBitmap();
-            }
-        }
-
-        private void CreateLineSegment()
-        {
-            int minPointsNumber = 2;
-
-            if (_markupPoints.Count >= minPointsNumber)
-            {
-                Point point1 = _markupPoints.Dequeue();
-                Point point2 = _markupPoints.Dequeue();
-
-                DisplayableLineSegment segment = new DisplayableLineSegment(point1, point2)
-                {
-                    OutlineColor = OutlineColor.GetColor(),
-                    OutlineThickness = OutlineThickness
-                };
-
-                _figures.Add(segment);
-                RedrawBitmap();
-            }
-        }
-
-        private void CreateEllipse()
-        {
-            int minPointsNumber = 2;
-
-            if (_markupPoints.Count >= minPointsNumber)
-            {
-                Point point1 = _markupPoints.Dequeue();
-                Point point2 = _markupPoints.Dequeue();
-
-                DisplayableEllipse ellipse = new DisplayableEllipse(point1, point2)
-                {
-                    OutlineColor = OutlineColor.GetColor(),
-                    OutlineThickness = OutlineThickness,
-                    FillingColor = FillingColor.GetColor()
-                };
-
-                _figures.Add(ellipse);
-                RedrawBitmap();
-            }
-        }
-
-        private void CreatePolygon()
-        {
-            int minPointsNumber = 3;
-
-            if (_markupPoints.Count >= minPointsNumber)
-            {
-                DisplayablePolygon polygon = new DisplayablePolygon(_markupPoints)
-                {
-                    OutlineColor = OutlineColor.GetColor(),
-                    OutlineThickness = OutlineThickness,
-                    FillingColor = FillingColor.GetColor()
-                };
-
-                _figures.Add(polygon);
-                _markupPoints.Clear();
-                RedrawBitmap();
-            }
-        }
-
-        private void CreateRegularPolygon()
-        {
-            int minPointsNumber = 3;
-
-            if (_markupPoints.Count >= minPointsNumber)
-            {
-                Point center = _markupPoints.Dequeue();
-                Point point = _markupPoints.Dequeue();
-
-                DisplayableRegularPolygon polygon = new DisplayableRegularPolygon(center, point, _markupPoints.Count + 2)
-                {
-                    OutlineColor = OutlineColor.GetColor(),
-                    OutlineThickness = OutlineThickness,
-                    FillingColor = FillingColor.GetColor()
-                };
-
-                _figures.Add(polygon);
-                _markupPoints.Clear();
+                _figures.Add(figure);
                 RedrawBitmap();
             }
         }

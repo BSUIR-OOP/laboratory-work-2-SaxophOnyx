@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Shapes;
 using System.Windows.Media;
+using System.Linq;
 
 namespace LabProject
 {
@@ -16,11 +16,11 @@ namespace LabProject
         public DisplayableRegularPolygon(Point center, Point point, int verticesNumber)
             : base(center, point, verticesNumber)
         {
-
+            
         }
 
 
-        Shape IDisplayable.CreateShape()
+        ShapeInfo IDisplayable.GetShapeInfo()
         {
             System.Windows.Shapes.Polygon shape = new System.Windows.Shapes.Polygon();
 
@@ -40,7 +40,14 @@ namespace LabProject
             shape.StrokeThickness = OutlineThickness;
             shape.Fill = new SolidColorBrush(FillingColor);
 
-            return shape;
+            Point left = shape.Points.OrderBy(p => p.X).First();
+            Point top = shape.Points.OrderBy(p => p.Y).First();
+            Point right = shape.Points.OrderBy(p => p.X).Last();
+            Point bottom = shape.Points.OrderBy(p => p.Y).Last();
+
+            Rect bb = new Rect(left.X, top.Y, right.X - left.X + shape.StrokeThickness * 2, bottom.Y - top.Y + shape.StrokeThickness * 2);
+
+            return new ShapeInfo(shape, bb);
         }
     }
 }

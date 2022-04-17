@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace LabProject
 {
@@ -19,7 +18,7 @@ namespace LabProject
         }
 
 
-        Shape IDisplayable.CreateShape()
+        ShapeInfo IDisplayable.GetShapeInfo()
         {
             System.Windows.Shapes.Ellipse shape = new System.Windows.Shapes.Ellipse
             {
@@ -31,7 +30,9 @@ namespace LabProject
                 Fill = new SolidColorBrush(FillingColor)
             };
 
-            return shape;
+            Rect bb = new Rect(shape.Margin.Left, shape.Margin.Top, shape.Width, shape.Height);
+
+            return new ShapeInfo(shape, bb);
         }
     }
 }
